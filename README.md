@@ -1,2 +1,2 @@
 # tensor-core-reduction
-Fast GPU based tensor core reductions
+Fast GPU based reductions using tensor cores
