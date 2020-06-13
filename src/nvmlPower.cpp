@@ -1,3 +1,5 @@
+// This code is a variant of the nvml power monitor code by Kajal Varma
+// located at https://github.com/kajalv/nvml-power 
 #include "nvmlPower.hpp"
 
 bool GPUpollThreadStatus = false;

@@ -1,3 +1,5 @@
+// This code is a small variant of the Rapl C++ class by Kent Czechowski (user kentcz)
+// located at https://github.com/kentcz/rapl-tools
 #include <cstdio>
 #include <string>
 #include <sstream>

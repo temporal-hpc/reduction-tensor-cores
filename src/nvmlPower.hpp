@@ -1,6 +1,5 @@
-/*
-Header file including necessary nvml headers.
-*/
+// This code is a variant of the nvml power monitor code by Kajal Varma
+// located at https://github.com/kajalv/nvml-power 
 
 #ifndef INCLNVML
 #define INCLNVML
