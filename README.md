@@ -15,9 +15,11 @@ make DEBUG=DEBUG POWER=POWER
 ```
 make
 ```
-### d) Other compile options
-Choose GPU arch: ARCH=<sm arch>
-Choose OpenMP threads (just for OpenMP mode) NPROCS=<value>
+### d) Other compile options (see Makefile)
+GPU arch        : ARCH
+Block Size      : BSIZE
+R Chain         : R
+OpenMP threads  : NPROCS
 
 ## Run
 run as ./prog dev n factor_ns seed REPEATS dist alg
