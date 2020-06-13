@@ -1,0 +1,4 @@
+revisar diferencia de error 
+make BSIZE=32 R=2 DEBUG=DEBUG KDEBUG=KDEBUG
+./prog 0 $((16384*1)) 0 23 1 0 1
+./prog 0 $((16384*1)) 0 23 1 0 4

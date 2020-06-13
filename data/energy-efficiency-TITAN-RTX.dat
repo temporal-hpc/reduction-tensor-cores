@@ -1,0 +1,22 @@
+#For each bar:
+#First  row: total energy
+#Second row: avg-power    n    total-time(ms)    beps-per-watt 
+
+#single-pass
+0     358.05
+0.5   256.43 419430400 1.3963 1.1714
+
+
+#CUB-half
+1.5   297.89
+2     230.71 419430400 1.29 1.4080
+
+
+#CUB-float
+3     648.95
+3.5   230.93 419430400 2.81 0.6463
+
+
+#OMP-NT10
+4.5   2890.93
+5.0   68.71 419430400 42.0696 0.1451
