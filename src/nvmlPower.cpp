@@ -209,7 +209,7 @@ void CPUPowerEnd(){
 	usleep(1000*COOLDOWN_MS);
 	CPUpollThreadStatus = false;
 	pthread_join(CPUpowerPollThread, 0);
-    printf("\n\tTotal Energy: %f J\n\tAverage Power: %f W\n\tTime: %f\n\n", rapl->pkg_total_energy(), rapl->pkg_average_power(), rapl->total_time());
+    printf("\n\tTotal Energy: %f J\n\tAverage Power: %f W\n\tTime: %f secs\n\n", rapl->pkg_total_energy(), rapl->pkg_average_power(), rapl->total_time());
 }
 
 
