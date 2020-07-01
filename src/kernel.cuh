@@ -176,8 +176,9 @@ __inline__ __device__ REAL block_reduce_tc(int N, half *a, int offset){
      int lane = tid & (WARPSIZE-1);
      int wid = tid/WARPSIZE;
      val = warp_shuffle_reduction_half(val);
-     if(lane == 0)
+     if(lane == 0){
          shared[wid] = val;
+     }
  
      __syncthreads();
      val = (tid < blockDim.x/WARPSIZE) ? shared[lane] : (half) 0.0f;
@@ -236,8 +237,41 @@ __inline__ __device__ REAL block_reduce_tc_R1(int N, half *a, int offset){
 	return val;
 }
 
+//       BLOCK 1          ....         BLOCK K
+// [ [TC MMAs | SHUFFLE]        [TC MMAs | SHUFFLE] ] ]
+__global__ void kernel_split(int N, half *a, float *out, int twarps, int swarps, int datablock){
+    __shared__ REAL sums[WARPSIZE];
+    REAL val=0;
+    int blockoff = (blockIdx.x)*datablock;
+    int shuffleoff = twarps*TCSQ; 
+    int lane = threadIdx.x & (WARPSIZE-1);
+    int wid = threadIdx.x >> 5;
+
+    if(wid < twarps){
+        // I) tensor core warps
+        val = reduction_tc_warp_R1(N, a, blockoff + wid*TCSQ, lane, wid << 8);
+    }
+    else{
+        // II) CUDA core warps
+        val = warp_shuffle_reduction_half(a[blockoff + shuffleoff + (threadIdx.x-twarps*32)]);
+    }
+	if(lane == 0){
+        //printf("threadIdx.x %i = %f\n", threadIdx.x, val);
+		sums[wid] = val;
+    }
+    __syncthreads();
+	val = (threadIdx.x < (blockDim.x >> 5)) ? sums[lane] : 0.0f;
+	if(wid == 0){
+        val = warp_shuffle_reduction_real(val);
+        if(threadIdx.x == 0){
+            atomicAdd(out, val);
+        }
+    }
+}
+
+
 // [ TC MMAs ..... |  CLASSIC SHUFFLE ]
-__global__ void kernel_split(int N, half *a, float *out, int bntc, int bns){
+__global__ void kernel_split_backup(int N, half *a, float *out, int bntc, int bns){
     REAL sum=0;
     int offset_tc = (blockIdx.x)*DIFF;
     if(blockIdx.x < bntc){

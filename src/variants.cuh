@@ -123,7 +123,43 @@ void singlepass_reduction(half *Adh, float *outd, long n, int REPEATS){
     #endif
 }
 
+// split approach: within a same block, some warps use Tensor Cores while others do shuffle
 void split_reduction(half *Adh, float *outd, long n, float factor_ns, int REPEATS){
+    int warps               = BSIZE >> 5;
+    dim3 block              = dim3(BSIZE, 1, 1);
+    int swarps             = (long)ceil(factor_ns*warps);
+    int twarps             = warps - swarps;
+    long datablock          = 256*twarps + 32*swarps;  
+    int gridblocks          = (n + datablock-1)/datablock;
+    dim3 grid               = dim3(gridblocks, 1, 1);
+    #ifdef KDEBUG
+        printf("BSIZE = %i    warps = %i    swarps %i    twarps %i   datablock %i\n", 
+                BSIZE, warps, swarps, twarps, datablock);
+        printf("grid (%i, %i, %i)    block(%i, %i, %i)  DIFF %i\n", grid.x, grid.y, grid.z, block.x, block.y, block.z,DIFF);
+    #endif
+    #ifdef POWER
+        GPUPowerBegin("split");
+        #ifdef POWER_DEBUG
+            printf("Measuring power consumption, press enter.....\n"); fflush(stdout);
+            getchar();
+        #endif
+    #endif
+    for(int i=0; i<REPEATS; ++i){
+        cudaMemset(outd, 0, sizeof(REAL)*1);
+        kernel_split<<<grid, block>>>(n, Adh, outd, twarps, swarps, datablock);  CUERR;
+        cudaDeviceSynchronize();
+    }
+    #ifdef POWER
+        #ifdef POWER_DEBUG
+            printf("done\n");
+            getchar();
+        #endif
+        GPUPowerEnd();
+    #endif
+}
+
+// original version, within the grid, some blocks do TC, others use CUDA cores.
+void split_reduction_backup(half *Adh, float *outd, long n, float factor_ns, int REPEATS){
     int bs = BSIZE >> 5;
     dim3 block = dim3(BSIZE, 1, 1);
     long nsh = (long)ceil(factor_ns*n);
@@ -144,7 +180,7 @@ void split_reduction(half *Adh, float *outd, long n, float factor_ns, int REPEAT
     #endif
     for(int i=0; i<REPEATS; ++i){
         cudaMemset(outd, 0, sizeof(REAL)*1);
-        kernel_split<<<grid, block>>>(n, Adh, outd, tc_blocks, ns_blocks);  CUERR;
+        kernel_split_backup<<<grid, block>>>(n, Adh, outd, tc_blocks, ns_blocks);  CUERR;
         cudaDeviceSynchronize();
     }
     #ifdef POWER
