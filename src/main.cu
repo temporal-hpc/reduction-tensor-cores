@@ -31,13 +31,20 @@
 int main(int argc, char **argv){
     // params
     if(argc != 8){
-        fprintf(stderr, "run as ./prog dev n factor_ns seed REPEATS dist alg\nalg:\
-        \n0 -> warp-shuffle\
-        \n1 -> recurrence\
-        \n2 -> single-pass\
-        \n3 -> split\
-        \n4 -> omp-reduction-float\
-        \n5 -> omp-reduction-double\n\n");
+        fprintf(stderr, "run as\n"
+        "./bin/prog dev n factor_ns seed REPEATS dist alg\n\n"
+        "dev         = GPU ID (i.e., 0, 1, 2, ...)\n"
+        "factor_ns   = Fraction of `n` to be processed by [REF] Warp Shuffle\n"
+        "seed        = PRNG seed for number generation\n"
+        "REPEATS     = Number of kernel execution repeats (for more stable average time measurements)\n"
+        "dist        = Data distribution: 0 -> Normal,  1 -> Uniform,  2 -> Constant\n"
+        "alg:\n"
+        "0 -> [REF] warp-shuffle\n"
+        "1 -> [Proposed Variant] recurrence\n"
+        "2 -> [Proposed Variant] single-pass\n"
+        "3 -> [Proposed Variant] split\n"
+        "4 -> OpenMP reduction float\n"
+        "5 -> OpenMP reduction double\n");
         exit(EXIT_FAILURE);
     }
     int dev = atoi(argv[1]);
